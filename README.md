@@ -25,19 +25,19 @@ Lancer le programme avec l'interface graphique :
   
     artebox
   
-EN CLI, télécharger les émissions définies dans le fichier "abonnements" :
+En CLI, télécharger les émissions définies dans le fichier "abonnements" :
 
     artebox -a 
 
-EN CLI, télécharger des émissions ponctuellement (recherche dans les noms d'émissions):    
+En CLI, télécharger des émissions ponctuellement (recherche dans les noms d'émissions):    
 
     artebox -e xenius*
 
-EN CLI, télécharger des émissions ponctuellement (recherche dans les sujets d'émissions):    
+En CLI, télécharger des émissions ponctuellement (recherche dans les sujets d'émissions):    
 
     artebox -e futur* -t 
 
-EN CLI, télécharger des émissions interactivement :
+En CLI, télécharger des émissions interactivement :
 
     artebox -i 
   
