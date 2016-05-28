@@ -16,7 +16,7 @@ Exemple de fichier de configuration, par défaut ~/.artebox.cfg <b>a créer manu
     # fichier contenant les noms des abonnements (optionnel)
     abonnements = /home/wlourf/abonnements.txt
 
-Exemple de fichier "abonnements" (le symbole * permet de rechercher sur une partie du fichier) :
+Exemple de fichier "abonnements" (le symbole * permet de rechercher sur une partie du nom) :
 
     Le dessous des cartes
     Mystères*
