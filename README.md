@@ -4,7 +4,7 @@ arte+7 downloader
 Téléchargement des émissions de arte+7 en ligne de commande ou avec interface GTK
 
   
-Exemple de fichier de config, par défaut ~/.artebox.cfg :
+Exemple de fichier de configuration, par défaut ~/.artebox.cfg <b>a créer manuellement</b>:
 
     [paramètres]
     # où sont enregistrés les vidéos
@@ -13,7 +13,7 @@ Exemple de fichier de config, par défaut ~/.artebox.cfg :
     # catalogue contenant les fichiers déjà téléchargés
     catalogue = /home/wlourf/artebox/catalogue.txt
     
-    # fichier contenant les noms des abonnements
+    # fichier contenant les noms des abonnements (optionnel)
     abonnements = /home/wlourf/abonnements.txt
 
 Exemple de fichier "abonnements" (le symbole * permet de rechercher sur une partie du fichier) :
@@ -44,7 +44,7 @@ EN CLI, télécharger des émissions interactivement :
 Autres paramètres :
 
     artebox -h 
-
+ 
     usage: ArteBox [-h] [-a] [-e EMISSION] [-t] [-L] [-D] [-i] [-v] [--no-dl]
                    [-S SIZE]
                    [CONFIG_FILE]
