@@ -24,7 +24,12 @@ import urllib.request, urllib.error, urllib.parse
 import json
 import time
 import sys
-from bs4 import BeautifulSoup
+
+try :
+    from bs4 import BeautifulSoup
+except:
+    print("Installer BeautifulSoup (python3-bs4)")
+    sys.exit(1)
 
 
 def listing_emissions_arte(base, bDisplay = False, treeRow = None): 
