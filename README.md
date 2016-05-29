@@ -4,7 +4,7 @@ arte+7 downloader
 Téléchargement des émissions de arte+7 en ligne de commande ou avec interface GTK
 
   
-Exemple de fichier de configuration, par défaut ~/.artebox.cfg <b>a créer manuellement</b>:
+Exemple de fichier de configuration, par défaut ~/.artebox.cfg <b>a créer manuellement</b> ou avec le script creer_fichier_config.sh :
 
     [paramètres]
     # où sont enregistrés les vidéos
@@ -68,3 +68,10 @@ Autres paramètres :
       --no-dl            pas de download (pour debug)
       -S SIZE            taille en Mo (pour debug)
     
+
+Dépendances : 
+
+    python3
+    python3-bs4
+    python3-gi
+    gir1.2-gtk-3.0
