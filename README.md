@@ -14,7 +14,7 @@ Exemple de fichier de configuration, par défaut ~/.artebox.cfg <b>a créer manu
     catalogue = /home/wlourf/artebox/catalogue.txt
     
     # fichier contenant les noms des abonnements (optionnel)
-    abonnements = /home/wlourf/abonnements.txt
+    abonnements = /home/wlourf/artebox/abonnements.txt
 
 Exemple de fichier "abonnements" (le symbole * permet de rechercher sur une partie du nom) :
 
