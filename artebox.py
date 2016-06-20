@@ -55,7 +55,7 @@ class Base:
                           'culture-pop', 'découverte', 'histoire',
                           'junior']
         # pour test une page
-        #self.pages_arte = [ 'junior' ]
+        # self.pages_arte = [ 'actu-société' ]
         self.url_arte7 = 'http://www.arte.tv/guide/fr/plus7/'
 
         # Initialize vars

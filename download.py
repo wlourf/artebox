@@ -122,12 +122,12 @@ def download_video( base, pg_info, tree_model_row = None ) :
     file_name_txt = file_name.replace('.mp4', '.txt' )
     file_name_tmp = file_name + '.tmp'
 
-    #print "*"*50
-    #formatsvideo = open('/tmp/tmp.txt', 'w')
-    #for f in formats:
-    #    print f , formats[f]
+    # print "*"*50
+    # formatsvideo = open('/tmp/tmp.txt', 'w')
+#    for f in formats:
+#        print (f , formats[f])
     #    formatsvideo.write( str(f) + '\t' + str(formats[f]) + '\n')
-    #formatsvideo.close()
+    # formatsvideo.close()
 
 
     #_2 : Allemand doublé         
@@ -135,15 +135,32 @@ def download_video( base, pg_info, tree_model_row = None ) :
     #_1 : Français doublé
     #_8 : VF ST sourds/mal
 
+    # SQ : bitrate 2200
+    # EQ : bitrate 1500
+    # MQ : bitrate 800
+    # LQ : bitrate 300
     # VOST par défaut, VF sinon
     if 'HTTP_MP4_SQ_3' in formats:
         url = formats['HTTP_MP4_SQ_3']['url']
         info_version = ' (VOST)'
-    else:
+    elif 'HTTP_MP4_SQ_1' in formats:
         url = formats['HTTP_MP4_SQ_1']['url']        
         info_version = ' (VF)'
+    if 'HTTP_MP4_EQ_3' in formats:
+        url = formats['HTTP_MP4_EQ_3']['url']
+        info_version = ' (VOST)'
+    elif 'HTTP_MP4_EQ_1' in formats:
+        url = formats['HTTP_MP4_EQ_1']['url']        
+        info_version = ' (VF)'
+    if 'HTTP_MP4_MQ_3' in formats:
+        url = formats['HTTP_MP4_MQ_3']['url']
+        info_version = ' (VOST)'
+    else:
+        url = formats['HTTP_MP4_MQ_1']['url']        
+        info_version = ' (VF)'
 
-    # fichier dans catalogue ?
+
+    # fichier dans cataloguue
     flagDL = True
     if len(arrCatalogue) > 0:
         for ligne in reversed(arrCatalogue):
