@@ -124,8 +124,8 @@ def download_video( base, pg_info, tree_model_row = None ) :
 
     # print "*"*50
     # formatsvideo = open('/tmp/tmp.txt', 'w')
-#    for f in formats:
-#        print (f , formats[f])
+    #for f in formats:
+    #    print (f , formats[f])
     #    formatsvideo.write( str(f) + '\t' + str(formats[f]) + '\n')
     # formatsvideo.close()
 
@@ -146,13 +146,13 @@ def download_video( base, pg_info, tree_model_row = None ) :
     elif 'HTTP_MP4_SQ_1' in formats:
         url = formats['HTTP_MP4_SQ_1']['url']        
         info_version = ' (VF)'
-    if 'HTTP_MP4_EQ_3' in formats:
+    elif 'HTTP_MP4_EQ_3' in formats:
         url = formats['HTTP_MP4_EQ_3']['url']
         info_version = ' (VOST)'
     elif 'HTTP_MP4_EQ_1' in formats:
         url = formats['HTTP_MP4_EQ_1']['url']        
         info_version = ' (VF)'
-    if 'HTTP_MP4_MQ_3' in formats:
+    elif 'HTTP_MP4_MQ_3' in formats:
         url = formats['HTTP_MP4_MQ_3']['url']
         info_version = ' (VOST)'
     else:
