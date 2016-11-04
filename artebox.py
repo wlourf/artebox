@@ -50,9 +50,9 @@ class Base:
         
         # constantes
         self.default_config_name = '.artebox.cfg'
-        self.pages_arte = ['actu-société' , 'séries-fiction', 'cinéma',
+        self.pages_arte = ['actu-societe' , 'series-fiction', 'cinema',
                           'arts-spectacles-classiques',
-                          'culture-pop', 'découverte', 'histoire',
+                          'culture-pop', 'decouverte', 'histoire',
                           'junior']
         # pour test une page
         # self.pages_arte = [ 'actu-société' ]

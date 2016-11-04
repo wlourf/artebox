@@ -49,10 +49,10 @@ def listing_emissions_arte(base, bDisplay = False, treeRow = None):
 
         url = urllib.parse.quote(racine + p,
                                 safe=':/', encoding='utf-8')
-
+        url = url + "?country=FR"
+        
         try:
             f = urllib.request.urlopen( url )
-#            print (url)
         except urllib.error.HTTPError as err:
             treeRow[4] = 'Erreur ' + str(err.code) + ' : ' + err.msg
             return tabXML
@@ -66,17 +66,14 @@ def listing_emissions_arte(base, bDisplay = False, treeRow = None):
             idx+=1
             while Gtk.events_pending():
                 Gtk.main_iteration()
-
-
         html_doc = f.read()
         f.close()
+        
         soup = BeautifulSoup(html_doc, 'html.parser')
-
         divCollection = soup.find("div", {"id": "container-collection"})
         data = json.loads(divCollection["data-categoryvideoset"])
 
         tabEmissions = []
-
         for v in data['videos']:
             scheduled = v['scheduled_on']
             if scheduled is  None: # ça arrive
