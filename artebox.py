@@ -27,7 +27,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import argparse
 import os
-import sys 
+import sys
 import configparser
 import importlib
 
@@ -40,14 +40,14 @@ try :
 except:
     print("Installer BeautifulSoup (python3-bs4)")
     sys.exit(1)
-                    
+
 
 class Base:
     """
     Main application
     """
     def __init__(self):
-        
+
         # constantes
         self.default_config_name = '.artebox.cfg'
         self.pages_arte = ['actu-societe' , 'series-fiction', 'cinema',
@@ -55,8 +55,14 @@ class Base:
                           'culture-pop', 'decouverte', 'histoire',
                           'junior']
         # pour test une page
-        # self.pages_arte = [ 'actu-société' ]
+        self.pages_arte = [ 'actu-et-societe' , 'arte-concert',
+                            'cinema', 'series-et-fictions',
+                            'culture-et-pop', 'sciences', 
+                            'voyages-et-decouvertes', 'histoire']
+        #self.pages_arte = [ 'culture-et-pop']
+
         self.url_arte7 = 'http://www.arte.tv/guide/fr/plus7/'
+        self.url_arte7 = 'http://www.arte.tv/fr/videos/'
 
         # Initialize vars
         self.args = None
@@ -70,10 +76,9 @@ class Base:
         self.downloads = []
         self.dl_running = False
         self.force_cancel = False
- 
 
         self.args, self.has_gui =  self.parse_command_line()
-        
+
         # Listing des émissions, en console uniquement
         if self.args.LISTING or self.args.LISTING_PLUS :
             sf.listing_emissions_arte(self, True)
@@ -89,7 +94,7 @@ class Base:
         if self.args.INTERACTIVE :
             self.arte7 = sf.listing_emissions_arte(self, True)
             self.interactive_download()
-            sys.exit(0)              
+            sys.exit(0)
 
         # Infos dans terminal
         # print("== Options ==")
@@ -101,7 +106,7 @@ class Base:
         print("                          %d lignes" % len(self.cat))
         if self.args.ABOS:
             print("fichier abonnements     : %s" % self.params['abonnements'])
-        
+
         # Affichage emissions dans terminal
         if len(self.abos)>0 :
             for nom in self.abos:
@@ -109,10 +114,10 @@ class Base:
                     print("\némission(s)             : - %s " % nom)
                 else:
                     print("                          - %s" % nom)
-                    
+
 
         # GO GUI
-        if self.has_gui : 
+        if self.has_gui :
              self.GUI.run()
 
         # GO CLI
@@ -121,27 +126,27 @@ class Base:
                 print('\nRien à faire ...\nBye')
                 sys.exit(0)
 
-            #pour formatage affichage
+            # pour formatage affichage
             lg = 0
             for abo in self.abos :
                 lg = max(len(abo), lg)
 
-            #récupère les urls des abonnements
+            # récupère les urls des abonnements
             sf.display_info(self.GUI,
                             "\nRécupère les liens des émissions ...")
             self.arte7 = sf.listing_emissions_arte(self,False)
 
-            #création du tableau de téléchargements
+            # création du tableau de téléchargements
             for abo in self.abos:
                 nbLiens = 0 #nb de liens pour une émission donnée
 
-                #pour les séries, on utilise *
+                # pour les séries, on utilise *
                 abo_serial = ''
                 if abo.find("*") > -1:
                     abo_serial = abo.split("*")[0]
-                
+
                 for page_info in self.arte7 :
-                    #recherche dans nom émission
+                    # recherche dans nom émission
                     if page_info[2].lower() == abo.lower():
                         self.downloads.append( page_info )
                         nbLiens +=1
@@ -150,8 +155,8 @@ class Base:
                         self.downloads.append( page_info  )
                         nbLiens +=1
 
-                    if self.args.SEARCH_IN_TITLE :    
-                        #recherche dans sujet émission
+                    if self.args.SEARCH_IN_TITLE :
+                        # recherche dans sujet émission
                         if page_info[5].lower() == abo.lower():
                             self.downloads.append( page_info )
                             nbLiens +=1
@@ -160,20 +165,20 @@ class Base:
                             self.downloads.append( page_info  )
                             nbLiens +=1
 
-                #mise en forme affichage
+                # mise en forme affichage
                 print('%s %d émission(s)' % (abo.ljust(lg + 4, "."), nbLiens))
 
             print("\n %d émission(s) disponible(s)\n" %len (self.downloads))
-        
+
             for download in self.downloads:
                 print (download[3], download[2], download[5])
 
             if len(self.downloads)>0:
                 print ("\n== Téléchargements ==")
-                
+
             for download in self.downloads:
                 dl.download_video( self, download ) #args, params, arrCatalogue, dl )
-            
+
         return
 
 
@@ -200,16 +205,16 @@ class Base:
                     iMin = idx
 
                 print (str(idx+1).rjust(3), line[2].ljust(zMax, '.'), line[3], line[4], line[5])
-                    
+
                 if idx+1 == len(self.arte7) or  self.arte7[idx][1] != self.arte7[idx+1][1]:
                     flagOK = False
                     iMax= idx
                     while not flagOK :
-                        response = input('\nChoix (séparés par des espaces ou ENTER): ')                    
+                        response = input('\nChoix (séparés par des espaces ou ENTER): ')
                         flagOK = self.interactive_check(iMin, iMax, response)
                     for r in response.split():
                         idx_downloads.append(r)
-                        
+
             idx += 1
 
         if len(idx_downloads) == 0:
@@ -221,17 +226,17 @@ class Base:
             print (download[3], download[2], download[5])
 
         print ("\n== Téléchargements ==")
-                            
+
         for d in idx_downloads:
              idx = int(d)-1
              dl.download_video(self, self.arte7[idx])
-             
+
 
     def interactive_check(self, iMin, iMax, response):
         """
         controle choix interactif
         """
-        
+
         flag = True
         for r in response.split():
             flag = r.isnumeric()
@@ -244,9 +249,9 @@ class Base:
 
         if not flag :
             print ("Choisir entre", iMin+1,"et",  iMax+1)
-            
+
         return flag
-            
+
     def check_params(self):
         """
         vérifie paramètres (présence dossiers enreg et fichier catalogue)
@@ -263,7 +268,7 @@ class Base:
                             'Erreur dossier d\'enregistrement : ',
                             params['save_dir'])
 
-    
+
         if not os.path.isfile( params['catalogue'] ):
             try :
                 f = open(params['catalogue'], 'w')
@@ -274,9 +279,9 @@ class Base:
                 ui.stop_app (self,
                             'Erreur lors de la création du catalogue : ',
                             params['catalogue'] )
-            
+
         return
-    
+
 
     def get_catalogue(self):
         """
@@ -297,7 +302,7 @@ class Base:
         return arrCatalogue
 
 
-    
+
     def parse_command_line(self):
         """
         command line parser
@@ -315,27 +320,27 @@ class Base:
         parser.add_argument('-a', action='store_true',
                 dest ='ABOS',
                 help='télécharger les abonnements')
-        parser.add_argument('-e', action='append',     
-                dest ='EMISSION', 
+        parser.add_argument('-e', action='append',
+                dest ='EMISSION',
                 help='émission à télécharger, peut être utilisé plusieurs fois')
-        parser.add_argument('-t', action='store_true',     
-                dest ='SEARCH_IN_TITLE', 
+        parser.add_argument('-t', action='store_true',
+                dest ='SEARCH_IN_TITLE',
                 help='recherche dans les titres')
-        
 
-        parser.add_argument('-L', action='store_true', 
-                dest ='LISTING', 
+
+        parser.add_argument('-L', action='store_true',
+                dest ='LISTING',
                 help='liste les émissions disponibles et quitte')
-        parser.add_argument('-D', action='store_true', 
-                dest ='LISTING_PLUS', 
+        parser.add_argument('-D', action='store_true',
+                dest ='LISTING_PLUS',
                 help='liste les émissions disponibles et les détails et quitte')
 
-        parser.add_argument('-i','--interactive', action='store_true', 
-                dest ='INTERACTIVE', 
+        parser.add_argument('-i','--interactive', action='store_true',
+                dest ='INTERACTIVE',
                 help='choix interactifs')
 
-                
-        parser.add_argument('-v', '--version', action='version', 
+
+        parser.add_argument('-v', '--version', action='version',
                 version=__name__ + ' version ' + __version__,
                 help='affiche la version')
 
@@ -344,30 +349,30 @@ class Base:
         #debug_subparsers = parser.add_subparsers(title='pour debug')
         #parser_foo = debug_subparsers.add_parser('foo')
         debug_group.add_argument('--no-dl',  action='store_true',
-                dest ='NODL', 
-                help='pas de download (pour debug)')                
+                dest ='NODL',
+                help='pas de download (pour debug)')
                                     #help='additional help')
 #help = "utilisé pour tests")
-        
-        debug_group.add_argument('-S',  type =int , 
-                dest ='SIZE', 
+
+        debug_group.add_argument('-S',  type =int ,
+                dest ='SIZE',
                 help='taille en Mo (pour debug)')
 
         #parser_a = debug_group.add_parser('-C', help='a help')
         #parser_a.add_argument('--bar', type=int, help='bar help')
-                                                                
+
         args = parser.parse_args()
-        
+
 
         has_gui = (not args.ABOS) and (args.EMISSION is None) and \
                 (not args.INTERACTIVE)
 
 
-        #Mutual exclusion works only for 1 arg against two args
+        # Mutual exclusion works only for 1 arg against two args
         if args.INTERACTIVE and (args.ABOS or (args.EMISSION is not None)):
             print ("-i non compatible avec -a ou -e")
             sys.exit(1)
-        
+
         return args, has_gui
 
 
@@ -381,14 +386,14 @@ class Base:
 
         if not os.path.isfile(config_file):
             ui.stop_app (self, 'Erreur fichier de configuration manquant : ', config_file)
-                
+
         dict = {}
         config = configparser.RawConfigParser(dict)
         try:
             config.read(config_file)
         except:
             ui.stop_app (self, 'Erreur dans fichier de configuration : ', config_file )
-           
+
         arrSections = config.sections()
         if not 'paramètres' in arrSections:
             ui.stop_app (self, 'Section \'paramètres\' manquante dans ', config_file)
@@ -398,7 +403,7 @@ class Base:
             params['save_dir']  = config.get('paramètres', 'dossier')
         else:
             ui.stop_app (self, 'Paramètres \'dossier\' non défini dans ', config_file)
-                                            
+
         if config.has_option('paramètres', 'catalogue'):
             params['catalogue'] = config.get('paramètres', 'catalogue')
         else:
@@ -410,8 +415,8 @@ class Base:
         if self.args.EMISSION is not None:
             arrAbo = self.args.EMISSION[:]
 
-        # le paramètre 'abonnements' n'est utilisé qu'en CLI, avec le param -a                
-        if self.args.ABOS : 
+        # le paramètre 'abonnements' n'est utilisé qu'en CLI, avec le param -a
+        if self.args.ABOS :
             if config.has_option('paramètres', 'abonnements'):
                 params['abonnements'] = config.get('paramètres', 'abonnements')
             else:
@@ -441,7 +446,7 @@ class Base:
 
 
 if __name__ == "__main__":
-    
+
     app = Base()
 
     try:

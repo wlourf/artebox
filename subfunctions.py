@@ -49,10 +49,12 @@ def listing_emissions_arte(base, bDisplay = False, treeRow = None):
 
         url = urllib.parse.quote(racine + p,
                                 safe=':/', encoding='utf-8')
-        url = url + "?country=FR"
-        
+#        url = url + "?country=FR"
+
+
+        print ("subfonction : ", url)
         try:
-            f = urllib.request.urlopen( url )
+            f = urllib.request.urlopen(url)
         except urllib.error.HTTPError as err:
             treeRow[4] = 'Erreur ' + str(err.code) + ' : ' + err.msg
             return tabXML
@@ -68,11 +70,129 @@ def listing_emissions_arte(base, bDisplay = False, treeRow = None):
                 Gtk.main_iteration()
         html_doc = f.read()
         f.close()
-        
-        soup = BeautifulSoup(html_doc, 'html.parser')
-        divCollection = soup.find("div", {"id": "container-collection"})
-        data = json.loads(divCollection["data-categoryvideoset"])
 
+        soup = BeautifulSoup(html_doc, 'html.parser')
+        #divCollection = soup.find("div", {"id": "container-collection"})
+        menuCollection = soup.find("ul", {"class": "next-menu-nav__sub-menu is-open"})
+        subLinks=[]
+        for subMenu in menuCollection:
+            for sm in subMenu:
+                if sm["href"][:4] != 'http' :
+                    subLinks.append( sm["href"])
+                #exit()
+                #print ("href", x["href"])
+                #for y in x:
+                #    print ("y", y)
+#        liCollection = soup.fing
+
+        tabEmissions = []
+        for subPage in subLinks :
+            print ( '\t' + subPage)
+            htmlPage = 'http://www.arte.tv' +  subPage + '/'
+#            print ()
+#            print ("MAIN : ", htmlPage)
+            url = urllib.parse.quote(htmlPage,
+                                safe=':/', encoding='utf-8')
+
+#            try:
+            f = urllib.request.urlopen(url)
+#            except urllib.error.HTTPError as err:
+#                treeRow[4] = 'Erreur ' + str(err.code) + ' : ' + err.msg
+#                return tabXML
+
+            html_doc = f.readlines()
+            f.close()
+#            print (len(html_doc))
+            for line in html_doc:
+                uline = str(line, 'utf-8')
+                if (uline.find('window.__INITIAL_STATE__'))> -1:
+                    texte = uline
+                    break
+                    #print (len(uline))
+                    #print (uline.split("{\"id"))
+            startCar = texte.find("=") +1
+
+            # put data in JSON
+            texte = texte[startCar:-2]
+#            textedumps = json.dumps(texte)
+            data = json.loads(texte)
+
+            #print (html_doc[0])
+            #print (html_doc[1])
+            #print (html_doc[2])
+
+            #html_doc = 'http://www.arte.tv' +  subPage + '/'
+            # print (html_doc)
+            #soup = BeautifulSoup(html_doc, 'html.parser')
+           # divCollection = soup.find("article", {"class": "next-teaser"})
+            #divCollection = soup.find_all("a", {"class": "next-teaser__link"})
+           # divCollection = soup.find_all("href", {"class": "next-teaser__link"})
+#            divCollection = soup.find("a", {"class": "next-teaser-full__link"})
+#            divCollection = soup.find("section", {"class": "next-section"})
+#            divCollection = soup.find("div", {"class" :"column column-block"})  #section", {"class": "next-section"})
+            #divCollection = soup.find_all("script")
+            #print (len(divCollection))
+#            print()
+            #for X in divCollection:
+            #    print (len(X), X[0])
+                    #print ("X", X)
+
+           # for link in soup.find_all('a', {"class": "next-teaser__link"}):
+           #     print(link.get('href'))
+           # data = json.loads(divCollection["a"])
+#            print ("divC", divCollection)
+            #print ("href", "http://www.arte.tv" + divCollection["href"])
+            #print ()
+
+#            for T in divCollection:
+#                print ("T",T)
+#            print ()
+#            data = json.loads(divCollection["a"])
+            #print (len(data))
+            #print (data['subcategory']['videos'])
+#            print (data['subcategory']['videos'])#['subcategory']['url'])
+            for v in data['subcategory']['videos']:
+ #               print ()
+#                print (v)
+#                exit()
+ #               print ()
+ #               print (v['url'])
+                scheduled = v['images'][0]['lastModified']
+                #scheduled = scheduled.replace('T', ' ')
+                #scheduled = scheduled.replace('Z', ' ')
+                scheduled = scheduled[8:10] + "/" +scheduled[5:7]+ "/"+ scheduled[:4]
+                #scheduled = '' #creationDate']
+                subtitle = v['subtitle'] or ''
+                id = v['id'] #[:10]
+                duration = v['duration'] or ''
+#                print (v['title'], scheduled)
+#                print (duration)
+                prefixe = 'http://arte.tv/papi/tvguide/videos/stream/player/F/'
+                suffixe = '_PLUS7-F/ALL/ALL.json'
+                #url = prefixe + id + suffixe
+                if bDisplay:
+                    tabEmissions.append(v['title'].strip())
+                    tabEmissions2.append( [p, v['title'].strip(), subtitle, scheduled] )
+                #print (data['page']['title'])
+                tabXML.append([ id,
+                                p,
+                                v['title'],
+#                                str(v['title']).encode('utf-8'),
+                                scheduled,
+                                str(duration),
+                                subtitle,
+                                '', # v['rights_end'],
+                                '', # v['teaser'],
+                                '', # v['thumbnail_url'],
+                                ''  # v['views']
+                               ])
+#            print (data)
+#            print (data['page']['id'])
+                """
+        exit()
+        data = json.loads(divCollection["a"])
+        print
+        print (data)
         tabEmissions = []
         for v in data['videos']:
             scheduled = v['scheduled_on']
@@ -109,12 +229,12 @@ def listing_emissions_arte(base, bDisplay = False, treeRow = None):
                                 v['thumbnail_url'],
                                 v['views']
                                ])
-
-        if base.args.LISTING:
-            tabSingle = list(set(tabEmissions))
-            tabSingle.sort()
-            for emi in tabSingle :
-                print('\t' + emi)
+            """
+    if base.args.LISTING:
+        tabSingle = list(set(tabEmissions))
+        tabSingle.sort()
+        for emi in tabSingle :
+            print('\t' + emi)
 
 
     if base.args.LISTING_PLUS or base.args.INTERACTIVE :

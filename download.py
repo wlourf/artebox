@@ -29,10 +29,11 @@ import shutil
 
 import subfunctions as sf
 
-def download_video( base, pg_info, tree_model_row = None ) : 
+
+def download_video( base, pg_info, tree_model_row = None ) :
     """
     pg_info = [ nomAbo, [infos sur la vidéo] ]
-    nomAbo  = None si par GTK, on prend le nom de la page_arte 
+    nomAbo  = None si par GTK, on prend le nom de la page_arte
     pour créer le sous-dossier d'enregistrement
     downloade en VOST par défaut, sinon VF
     """
@@ -44,20 +45,32 @@ def download_video( base, pg_info, tree_model_row = None ) :
     racine  = "http://arte.tv/papi/tvguide/videos/stream/player/F/"
     suffixe = "_PLUS7-F/ALL/ALL.json"
 
+    racine = "https://api.arte.tv/api/player/v1/config/fr/"
+    suffixe = ""
+
     args         = base.args
     params       = base.params
     arrCatalogue = base.cat
+    #emi_id = pg_info[0]
+
+    #f = urllib.request.urlopen(url)
+    #html_doc = f.read()
+    #f.close()
+
+    #soup = BeautifulSoup(html_doc, 'html.parser')
+    #menuCollection = soup.find("iframe")
+    #JSONlink = menuCollection['src']
+
+    #print (JSONlink)
+
 
     emi_id = pg_info[0]
-    if emi_id[-1:] == "A":
-        id_url = emi_id[:10]
-    else:
-        id_url = emi_id
-        
+    id_url = emi_id.split("_")[0]
+
     titre  = pg_info[2].strip().replace(' ', '_')
     sujet  = pg_info[5]#).decode('utf-8')
     sujet  = sujet.strip().replace(' ', '_')
-    
+
     # on enregistre dans le dossier de la page, et non dans le dossier
     # de l'abonnement pour l'instant
     nomAbo =  pg_info[1].replace(' ', '_')
@@ -67,10 +80,12 @@ def download_video( base, pg_info, tree_model_row = None ) :
         sf.display_info(base.GUI, 'Création du dossier' , pc_dir )
         os.makedirs(pc_dir)
 
-    
-    # lien Json contient le lien vers la vidéo 
+    print (emi_id)
+    print (id_url)
+    # lien Json contient le lien vers la vidéo
     # et les infos supplémentaires sur la vidéo
     lienJSon = racine + id_url + suffixe
+    print ("JSON", lienJSon)
 
     # emisison id, parfois
     # liens : parfois 049281-000-F_PLUS7-F
@@ -82,33 +97,42 @@ def download_video( base, pg_info, tree_model_row = None ) :
             tree_model_row[5] = strErr
             iter_row = sf.display_info(base.GUI, titre + '-' + sujet, strErr )
             base.GUI.mdl_dl.remove(iter_model_row)
-            
+
         else:
             print (strErr)
 
         return
-    
+
     json_doc = f.read()
     f.close()
     dataVideo = json.loads(json_doc.decode('utf-8'))
 
     #formats de la vidéo
-    
+
     #jsonplayer = open('/tmp/jsonplayer.txt', 'w')
     #for f in dataVideo['videoJsonPlayer']:
-    #    print f , dataVideo['videoJsonPlayer'][f]
+    #    print (f , dataVideo['videoJsonPlayer'][f])
     #    jsonplayer.write( str(f) + '\t' + str(dataVideo['videoJsonPlayer'][f]) + '\n')
     #jsonplayer.close()
-    #for k in  dataVideo['videoJsonPlayer'].keys():
-    #    print (k, dataVideo['videoJsonPlayer'][k])
+#    for k in  dataVideo['videoJsonPlayer'].keys():
+#        print (k, dataVideo['videoJsonPlayer'][k])
+#    print ()
 
-    if 'VDE' in  dataVideo['videoJsonPlayer'] :
-        teaser = dataVideo['videoJsonPlayer']['VDE']
+    if 'V7T' in  dataVideo['videoJsonPlayer'] :
+        teaser = dataVideo['videoJsonPlayer']['V7T']
     else:
         teaser = ""
     formats  =  dataVideo['videoJsonPlayer']['VSR']
     tdate = dataVideo['videoJsonPlayer']['VRA'] #VDA VRA?
     tdate = tdate[:-6] #remove offset UTC, %z fonctionne pas avec strptime ?
+
+    ttitle = dataVideo['videoJsonPlayer']['VTI']
+    if 'subtitle' in  dataVideo['videoJsonPlayer'] :
+        tsubtitle = dataVideo['videoJsonPlayer']['subtitle']
+    else:
+        tsubtitle = ""
+
+    tID = dataVideo['videoJsonPlayer']['VID']
     outDate = time.strptime(tdate, "%d/%m/%Y %H:%M:%S")
     if sujet == '':
         sujet = time.strftime( "%Y%m%d_%H%M%S", outDate)
@@ -130,36 +154,55 @@ def download_video( base, pg_info, tree_model_row = None ) :
     # formatsvideo.close()
 
 
-    #_2 : Allemand doublé         
+    #_2 : Allemand original (VA)
     #_3 : Français (Sous-titres)  : VOST
-    #_1 : Français doublé
+    #_1 : Français doublé VF
     #_8 : VF ST sourds/mal
+    #_11 : VOST anglais
+    #_12 : VOST espagnol
 
     # SQ : bitrate 2200
     # EQ : bitrate 1500
-    # MQ : bitrate 800
-    # LQ : bitrate 300
+    # HQ : bitrate 800
+    # MQ : bitrate 300
     # VOST par défaut, VF sinon
-    if 'HTTP_MP4_SQ_3' in formats:
-        url = formats['HTTP_MP4_SQ_3']['url']
+
+    if 'HTTPS_MP4_SQ_3' in formats:
+        url = formats['HTTPS_MP4_SQ_3']['url']
         info_version = ' (VOST)'
-    elif 'HTTP_MP4_SQ_1' in formats:
-        url = formats['HTTP_MP4_SQ_1']['url']        
+    elif 'HTTPS_MP4_SQ_1' in formats:
+        url = formats['HTTPS_MP4_SQ_1']['url']
         info_version = ' (VF)'
-    elif 'HTTP_MP4_EQ_3' in formats:
-        url = formats['HTTP_MP4_EQ_3']['url']
-        info_version = ' (VOST)'
-    elif 'HTTP_MP4_EQ_1' in formats:
-        url = formats['HTTP_MP4_EQ_1']['url']        
+    elif 'HTTPS_SQ_1' in formats:
+        url = formats['HTTPS_SQ_1']['url']
         info_version = ' (VF)'
-    elif 'HTTP_MP4_MQ_3' in formats:
-        url = formats['HTTP_MP4_MQ_3']['url']
+    elif 'HTTPS_MP4_EQ_3' in formats:
+        url = formats['HTTPS_MP4_EQ_3']['url']
         info_version = ' (VOST)'
+    elif 'HTTPS_MP4_EQ_1' in formats:
+        url = formats['HTTPS_MP4_EQ_1']['url']
+        info_version = ' (VF)'
+    elif 'HTTPS_EQ_1' in formats:
+        url = formats['HTTPS_EQ_1']['url']
+        info_version = ' (VF)'
+    elif 'HTTPS_HQ_1' in formats:
+        url = formats['HTTPS_HQ_1']['url']
+        info_version = ' (VF)'
+    elif 'HTTPS_MP4_MQ_3' in formats:
+        url = formats['HTTPS_MP4_MQ_3']['url']
+        info_version = ' (VOST)'
+    elif 'HTTPS_MQ_1' in formats:
+        url = formats['HTTPS_MQ_1']['url']
+        info_version = ' (VF)'
     else:
-        url = formats['HTTP_MP4_MQ_1']['url']        
+        url = formats['HTTPS_MP4_MQ_1']['url']
         info_version = ' (VF)'
 
 
+
+
+    print (url)
+    print (info_version)
     # fichier dans cataloguue
     flagDL = True
     if len(arrCatalogue) > 0:
@@ -169,18 +212,18 @@ def download_video( base, pg_info, tree_model_row = None ) :
                 if base.has_gui :
                     tree_model_row[5] = "Présent dans le catalogue"
                     tree_model_row[7] = file_name + " présent dans le catalogue"
-                
+
                 flagDL = False
                 break
 
 
     if flagDL:
         base.dl_running = True
-        
+
         if base.has_gui :
             pass
 
-        
+
         if base.args.NODL: #pour debug
             txt_no_dl = ' --> option no-dl : skip download'
             if base.has_gui:
@@ -198,16 +241,16 @@ def download_video( base, pg_info, tree_model_row = None ) :
                 else:
                     print(">", strErr)
                 return
-                
+
             file_size = int(response.headers['content-length'])
-            
+
             CHUNK = 16 * 1024
             bytes_so_far = 0.0
 
             if not base.has_gui:
                 print(fichier + info_version)
             else:
-                tree_model_row[7] = file_name + info_version   
+                tree_model_row[7] = file_name + info_version
             with open(file_name_tmp, 'wb') as fp:
                 while True:
                     if base.force_cancel :
@@ -216,7 +259,7 @@ def download_video( base, pg_info, tree_model_row = None ) :
                         tree_model_row[7] = file_name_tmp + " : annulé"
                         sf.display_info(base.GUI, fichier, "annulé")
                         break
-                        
+
                     chunk = response.read(CHUNK)
                     if base.args.SIZE is not None and base.args.SIZE > 0 and bytes_so_far > base.args.SIZE*1024*1024:
                         break
@@ -235,34 +278,34 @@ def download_video( base, pg_info, tree_model_row = None ) :
                     else:
                         sys.stdout.write("\rTéléchargé : %d/%d Mo (%0.1f%%)" % (bytes_so_far/1024/1024, file_size/1024/1024,percent))
                         sys.stdout.flush()
-            
+
             if base.has_gui :
                 if not base.force_cancel :
                     sf.display_info(base.GUI, fichier, "terminé")
                 base.GUI.view_emi.set_sensitive(True)
-            print('\n')                    
+            print('\n')
 
 
         if not base.force_cancel and not base.args.NODL:
             os.rename(file_name_tmp, file_name)
 
-            # fichier txt résumé    
+            # fichier txt résumé
             finfo = open(file_name_txt, 'w')
             finfo.write("Émission   : " + pg_info[2] +"\n")
-            finfo.write("Date       : " + pg_info[3] + "\n")
-            finfo.write("Durée      : " + pg_info[4] + "\n")
-            finfo.write("Titre      : " + pg_info[5] + "\n")
-            finfo.write("Sous-titre : " + pg_info[7] + "\n")
+            finfo.write("Date       : " + tdate + "\n")
+            finfo.write("Durée      : " + str(pg_info[4]) + "\n")
+            finfo.write("Titre      : " + ttitle + "\n")
+            finfo.write("Sous-titre : " + tsubtitle + "\n")
             finfo.write("\nRésumé     : \n" + teaser + "\n")
-            finfo.write("\nId         : " + pg_info[0] + "\n")
+            finfo.write("\nId         : " + tID + "\n")
             finfo.close()
-            
+
             # inscrit le fichier téléchargé dans le catalogue
             fcat = open(params['catalogue'],"a")
             fcat.write(emi_id + ';' + fichier + ';\n')
             fcat.close()
 
-                     
+
         if not base.has_gui:
             print()
 
@@ -270,4 +313,4 @@ def download_video( base, pg_info, tree_model_row = None ) :
         base.GUI.mdl_dl.remove(iter_model_row)
 
 
-    base.dl_running = False  
+    base.dl_running = False
